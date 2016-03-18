@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://shuovr.cn/categories/index.html</loc>
+    
+    <lastmod>2016-03-18T06:41:06.321Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://shuovr.cn/tags/index.html</loc>
+    
+    <lastmod>2016-03-18T06:40:48.647Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://shuovr.cn/2016/03/16/test-disqus/</loc>
     
     <lastmod>2016-03-16T09:50:59.268Z</lastmod>
