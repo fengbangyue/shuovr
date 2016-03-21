@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://shuovr.cn/"/>
-  <updated>2016-03-21T08:04:53.293Z</updated>
+  <updated>2016-03-21T08:07:15.930Z</updated>
   <id>http://shuovr.cn/</id>
   
   <author>
@@ -20,9 +20,10 @@
     <link href="http://shuovr.cn/2016/03/21/%E8%AE%A9exe%E5%B4%A9%E6%BA%83%E6%97%B6%E7%94%9F%E6%88%90dump%E6%96%87%E4%BB%B6/"/>
     <id>http://shuovr.cn/2016/03/21/让exe崩溃时生成dump文件/</id>
     <published>2016-03-21T07:43:12.843Z</published>
-    <updated>2016-03-21T08:04:53.293Z</updated>
+    <updated>2016-03-21T08:07:15.930Z</updated>
     
-    <content type="html">&lt;p&gt;##让exe崩溃时生成dump文件&lt;br&gt;  在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。&lt;/p&gt;
+    <content type="html">&lt;hr&gt;
+&lt;h2 id=&quot;titile-让exe崩溃时生成dump文件&quot;&gt;&lt;a href=&quot;#titile-让exe崩溃时生成dump文件&quot; class=&quot;headerlink&quot; title=&quot;titile:让exe崩溃时生成dump文件&quot;&gt;&lt;/a&gt;titile:让exe崩溃时生成dump文件&lt;/h2&gt;&lt;p&gt;  在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。&lt;/p&gt;
 &lt;p&gt;####dump如何加入到工程&lt;br&gt;  dump文件内容如下: &lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;#pragma once
 #include &amp;lt;windows.h&amp;gt;
@@ -100,8 +101,8 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
     
     <summary type="html">
     
-      &lt;p&gt;##让exe崩溃时生成dump文件&lt;br&gt;  在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。&lt;/p&gt;
-&lt;p&gt;####dump如何
+      &lt;hr&gt;
+&lt;h2 id=&quot;titile-让exe崩溃时生成dump文件&quot;&gt;&lt;a href=&quot;#titile-让exe崩溃时生成dump文件&quot; class=&quot;headerlink&quot; title=&quot;titile:让exe崩溃时生成dump文件&quot;&gt;&lt;/a&gt;titile:让exe崩溃时生
     
     </summary>
     
