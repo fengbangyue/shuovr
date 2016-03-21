@@ -75,7 +75,7 @@ dump如何加入到工程  dump文件内容如下:
 #include &amp;lt;windows.h&amp;gt;
    #include &amp;lt;DbgHelp.h&amp;gt;
 #incl">
-<meta property="og:updated_time" content="2016-03-21T08:13:16.659Z">
+<meta property="og:updated_time" content="2016-03-21T08:24:08.173Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="让exe崩溃时生成dump文件">
 <meta name="twitter:description" content="在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。
@@ -226,7 +226,7 @@ dump如何加入到工程  dump文件内容如下:
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">Posted on</span>
+            <span class="post-meta-item-text">Veröffentlicht am</span>
             <time itemprop="dateCreated" datetime="2016-03-21T15:43:12+08:00" content="2016-03-21">
               2016-03-21
             </time>
@@ -264,7 +264,7 @@ dump如何加入到工程  dump文件内容如下:
 
       
         <p>  在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。</p>
-<h4 id="dump如何加入到工程"><a href="#dump如何加入到工程" class="headerlink" title="dump如何加入到工程"></a>dump如何加入到工程</h4><p>  dump文件内容如下: </p>
+<h3 id="dump如何加入到工程"><a href="#dump如何加入到工程" class="headerlink" title="dump如何加入到工程"></a>dump如何加入到工程</h3><p>  dump文件内容如下: </p>
 <pre><code>#pragma once
 #include &lt;windows.h&gt;
    #include &lt;DbgHelp.h&gt;
@@ -299,7 +299,7 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
    }
    return FALSE;
  }
-</code></pre><h4 id="创建dump文件"><a href="#创建dump文件" class="headerlink" title="创建dump文件"></a>创建dump文件</h4><pre><code>inline void CreateMiniDump(PEXCEPTION_POINTERS pep, LPCTSTR strFileName){
+</code></pre><h3 id="创建dump文件"><a href="#创建dump文件" class="headerlink" title="创建dump文件"></a>创建dump文件</h3><pre><code>inline void CreateMiniDump(PEXCEPTION_POINTERS pep, LPCTSTR strFileName){
     HANDLE hFile = CreateFile(strFileName, GENERIC_READ|GENERIC_WRITE,FILE_SHARE_WRITE,NULL,CREATE_ALWAYS,
     FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -323,13 +323,13 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
        CloseHandle(hFile);
    }
 }
-</code></pre><h4 id="设置回调函数给系统-才能在崩溃是调用我们的函数"><a href="#设置回调函数给系统-才能在崩溃是调用我们的函数" class="headerlink" title="设置回调函数给系统,才能在崩溃是调用我们的函数"></a>设置回调函数给系统,才能在崩溃是调用我们的函数</h4><pre><code>LONG __stdcall MyUnhandledExceptionFilter(
+</code></pre><h3 id="设置回调函数给系统-才能在崩溃是调用我们的函数"><a href="#设置回调函数给系统-才能在崩溃是调用我们的函数" class="headerlink" title="设置回调函数给系统,才能在崩溃是调用我们的函数"></a>设置回调函数给系统,才能在崩溃是调用我们的函数</h3><pre><code>LONG __stdcall MyUnhandledExceptionFilter(
         PEXCEPTION_POINTERS pExceptionInfo){
     //设置生成的文件名为core.dmp
     CreateMiniDump(pExceptionInfo, L&quot;core.dmp&quot;);
     return EXCEPTION_EXECUTE_HANDLER;
 }
-</code></pre><h4 id="关闭对函数SetUnhandledExceptionFilter的调用"><a href="#关闭对函数SetUnhandledExceptionFilter的调用" class="headerlink" title="关闭对函数SetUnhandledExceptionFilter的调用"></a>关闭对函数SetUnhandledExceptionFilter的调用</h4><pre><code>void DisableSetUnhandleExceptionFilter(){
+</code></pre><h3 id="关闭对函数SetUnhandledExceptionFilter的调用"><a href="#关闭对函数SetUnhandledExceptionFilter的调用" class="headerlink" title="关闭对函数SetUnhandledExceptionFilter的调用"></a>关闭对函数SetUnhandledExceptionFilter的调用</h3><pre><code>void DisableSetUnhandleExceptionFilter(){
     void* addr = (void*)GetProcAddress(LoadLibrary(L&quot;kernel32.dll&quot;),
     &quot;SetUnhandleExceptionFilter&quot;);
 
@@ -347,7 +347,7 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
      VirtualProtect(addr,size,dwOldFlag,&amp;dwTempFlag);
      }
  }
-</code></pre><h4 id="安装dump代码-工程直接调用此韩剧即可"><a href="#安装dump代码-工程直接调用此韩剧即可" class="headerlink" title="安装dump代码,工程直接调用此韩剧即可"></a>安装dump代码,工程直接调用此韩剧即可</h4><pre><code>void InitMiniDump(){
+</code></pre><h3 id="安装dump代码-工程直接调用此韩剧即可"><a href="#安装dump代码-工程直接调用此韩剧即可" class="headerlink" title="安装dump代码,工程直接调用此韩剧即可"></a>安装dump代码,工程直接调用此韩剧即可</h3><pre><code>void InitMiniDump(){
     //注册异常处理函数
     SetUnhandleExceptionFilter(MyUnhandledExceptionFilter);
     //关闭系统自己调用
@@ -425,10 +425,10 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            Table of Contents
+            Inhaltsverzeichnis
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview">
-            Overview
+            Übersicht
           </li>
         </ul>
       
@@ -445,7 +445,7 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
           <div class="site-state-item site-state-posts">
             <a href="/">
               <span class="site-state-item-count">4</span>
-              <span class="site-state-item-name">posts</span>
+              <span class="site-state-item-name">Artikel</span>
             </a>
           </div>
 
@@ -488,7 +488,7 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#dump如何加入到工程"><span class="nav-number">1.</span> <span class="nav-text">dump如何加入到工程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建dump文件"><span class="nav-number">2.</span> <span class="nav-text">创建dump文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#设置回调函数给系统-才能在崩溃是调用我们的函数"><span class="nav-number">3.</span> <span class="nav-text">设置回调函数给系统,才能在崩溃是调用我们的函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#关闭对函数SetUnhandledExceptionFilter的调用"><span class="nav-number">4.</span> <span class="nav-text">关闭对函数SetUnhandledExceptionFilter的调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装dump代码-工程直接调用此韩剧即可"><span class="nav-number">5.</span> <span class="nav-text">安装dump代码,工程直接调用此韩剧即可</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#dump如何加入到工程"><span class="nav-number">1.</span> <span class="nav-text">dump如何加入到工程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建dump文件"><span class="nav-number">2.</span> <span class="nav-text">创建dump文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置回调函数给系统-才能在崩溃是调用我们的函数"><span class="nav-number">3.</span> <span class="nav-text">设置回调函数给系统,才能在崩溃是调用我们的函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关闭对函数SetUnhandledExceptionFilter的调用"><span class="nav-number">4.</span> <span class="nav-text">关闭对函数SetUnhandledExceptionFilter的调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装dump代码-工程直接调用此韩剧即可"><span class="nav-number">5.</span> <span class="nav-text">安装dump代码,工程直接调用此韩剧即可</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
@@ -518,7 +518,7 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
 </div>
 
 <div class="powered-by">
-  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+  Erstellt mit  <a class="theme-link" href="http://hexo.io">Hexo</a>
 </div>
 
 <div class="theme-info">
