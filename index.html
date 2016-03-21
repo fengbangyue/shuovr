@@ -202,6 +202,177 @@
             
               
                 
+                <a class="post-title-link" href="/2016/03/21/让exe崩溃时生成dump文件/" itemprop="url">
+                  Untitled
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">Posted on</span>
+            <time itemprop="dateCreated" datetime="2016-03-21T15:43:12+08:00" content="2016-03-21">
+              2016-03-21
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/03/21/让exe崩溃时生成dump文件/" class="leancloud_visitors" data-flag-title="">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">visitors </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>##让exe崩溃时生成dump文件<br>  在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。</p>
+<p>####dump如何加入到工程<br>  dump文件内容如下: </p>
+<pre><code>#pragma once
+#include &lt;windows.h&gt;
+   #include &lt;DbgHelp.h&gt;
+#include &lt;stdlib.h&gt;
+#pragma comment(lib, &quot;dbghelp.lib&quot;)   
+
+inline BOOL IsDataSectionNeeded(){
+    if(pModuleNmae == NULL) return FALSE;
+    WCHAR szFileName(pModuleName, NULL, NULL, szFileName, NULL);
+    if(wcsicmp(szFileName, L&quot;ntdll&quot;) == 0) return TRUE;
+
+    return FALSE;
+}
+
+
+inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
+   const PMINIDUMP_CALLBACK_INPUT pInput,
+   PMINIDUMP_CALLBACK_OUTPUT pOutput){
+     if(pInput == 0 || pOutput == 0) return FALSE;
+
+   switch(pInput-&gt;CallbackType){
+       case ModuleCallback:
+       if(pOutput-&gt;ModuleWriteFlags &amp; ModuleWriteDataSeg)
+           if(!IsDataSectionNeeded(pInput-&gt;Module.FullPath))
+                pOutput-&gt;ModuleWriteFlags &amp;= (~ModuleWriteDataSeg);
+        case IncludeModuleCallback:
+        case IncludeThreadCallback:
+        case ThreadCallback:
+        case ThreadExCallback:
+             return TRUE;
+        defalut:;
+   }
+   return FALSE;
+ }
+</code></pre><p>####创建dump文件<br>       inline void CreateMiniDump(PEXCEPTION_POINTERS pep, LPCTSTR strFileName){<br>           HANDLE hFile = CreateFile(strFileName, GENERIC_READ|GENERIC_WRITE,FILE_SHARE_WRITE,NULL,CREATE_ALWAYS,<br>           FILE_ATTRIBUTE_NORMAL, NULL);</p>
+<pre><code>   if((hFile != NULL) &amp;&amp; (hFile != INVALID_HANDLE_VALUE)){
+       MINIDUMP_EXCEPTION_INFORMATIN mdei;
+       mdei.ThreadId     = GetCurrentThreadId();
+       mdei.ExceptionPointers  = pep;
+       mdei.ClientPointers     = NULL;
+
+       MINIDUMP_CALLBACK_INFORMATION mci;
+       mci.CallbackRoutine = (MINIDUMP_CALLBACK_ROUTINE)MiniDumpCallback;
+       mci.CallbackParam   = 0;
+
+       //主要研究这个函数
+       ::MiniDumpWriteDump(::GetCurrentProcess(),
+                           ::GetCurrentProcessId(),
+                           hFile,
+                           MiniDumpValidTypeFlags,
+                           (pep != 0)?&amp;mdei:0,
+                           NULL,&amp;mci);
+       CloseHandle(hFile);
+   }
+}
+</code></pre><p>####设置回调函数给系统,才能在崩溃是调用我们的函数<br>      LONG __stdcall MyUnhandledExceptionFilter(<br>              PEXCEPTION_POINTERS pExceptionInfo){<br>          //设置生成的文件名为core.dmp<br>          CreateMiniDump(pExceptionInfo, L”core.dmp”);<br>          return EXCEPTION_EXECUTE_HANDLER;<br>      }</p>
+<p>####关闭对函数SetUnhandledExceptionFilter的调用<br>       void DisableSetUnhandleExceptionFilter(){<br>           void<em> addr = (void</em>)GetProcAddress(LoadLibrary(L”kernel32.dll”),<br>           “SetUnhandleExceptionFilter”);</p>
+<pre><code>if(addr){
+    unsigned char code[16];
+    int size = 0;
+    code[size++] = 0x33;
+    code[size++] = 0xC0;
+    code[size++] = 0xC2;
+    code[size++] = 0x04;
+    code[size++] = 0x00;
+    DWORD dwOldFlag, dwTempFlag;
+    VirtualProtect(addr,size, PAGE_READWRITE, &amp;dwOldFlag);
+    WriteProcessMemory(GetCurrentProcess(),addr,code,size,NULL);
+    VirtualProtect(addr,size,dwOldFlag,&amp;dwTempFlag);
+    }
+}
+</code></pre><p>####安装dump代码,工程直接调用此韩剧即可<br>      void InitMiniDump(){<br>          //注册异常处理函数<br>          SetUnhandleExceptionFilter(MyUnhandledExceptionFilter);<br>          //关闭系统自己调用<br>          DisableSetUnhandledExceptionFilter();<br>      }</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/03/16/test-disqus/" itemprop="url">
                   测试评论系统
                 </a>
@@ -536,7 +707,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">posts</span>
             </a>
           </div>
