@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://shuovr.cn/"/>
-  <updated>2016-03-21T08:10:25.368Z</updated>
+  <updated>2016-03-21T08:13:16.659Z</updated>
   <id>http://shuovr.cn/</id>
   
   <author>
@@ -20,10 +20,10 @@
     <link href="http://shuovr.cn/2016/03/21/%E8%AE%A9exe%E5%B4%A9%E6%BA%83%E6%97%B6%E7%94%9F%E6%88%90dump%E6%96%87%E4%BB%B6/"/>
     <id>http://shuovr.cn/2016/03/21/让exe崩溃时生成dump文件/</id>
     <published>2016-03-21T07:43:12.843Z</published>
-    <updated>2016-03-21T08:10:25.368Z</updated>
+    <updated>2016-03-21T08:13:16.659Z</updated>
     
     <content type="html">&lt;p&gt;  在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。&lt;/p&gt;
-&lt;p&gt;####dump如何加入到工程&lt;br&gt;  dump文件内容如下: &lt;/p&gt;
+&lt;h4 id=&quot;dump如何加入到工程&quot;&gt;&lt;a href=&quot;#dump如何加入到工程&quot; class=&quot;headerlink&quot; title=&quot;dump如何加入到工程&quot;&gt;&lt;/a&gt;dump如何加入到工程&lt;/h4&gt;&lt;p&gt;  dump文件内容如下: &lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;#pragma once
 #include &amp;lt;windows.h&amp;gt;
    #include &amp;lt;DbgHelp.h&amp;gt;
@@ -58,8 +58,11 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
    }
    return FALSE;
  }
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;####创建dump文件&lt;br&gt;       inline void CreateMiniDump(PEXCEPTION_POINTERS pep, LPCTSTR strFileName){&lt;br&gt;           HANDLE hFile = CreateFile(strFileName, GENERIC_READ|GENERIC_WRITE,FILE_SHARE_WRITE,NULL,CREATE_ALWAYS,&lt;br&gt;           FILE_ATTRIBUTE_NORMAL, NULL);&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;   if((hFile != NULL) &amp;amp;&amp;amp; (hFile != INVALID_HANDLE_VALUE)){
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&quot;创建dump文件&quot;&gt;&lt;a href=&quot;#创建dump文件&quot; class=&quot;headerlink&quot; title=&quot;创建dump文件&quot;&gt;&lt;/a&gt;创建dump文件&lt;/h4&gt;&lt;pre&gt;&lt;code&gt;inline void CreateMiniDump(PEXCEPTION_POINTERS pep, LPCTSTR strFileName){
+    HANDLE hFile = CreateFile(strFileName, GENERIC_READ|GENERIC_WRITE,FILE_SHARE_WRITE,NULL,CREATE_ALWAYS,
+    FILE_ATTRIBUTE_NORMAL, NULL);
+
+   if((hFile != NULL) &amp;amp;&amp;amp; (hFile != INVALID_HANDLE_VALUE)){
        MINIDUMP_EXCEPTION_INFORMATIN mdei;
        mdei.ThreadId     = GetCurrentThreadId();
        mdei.ExceptionPointers  = pep;
@@ -79,29 +82,42 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
        CloseHandle(hFile);
    }
 }
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;####设置回调函数给系统,才能在崩溃是调用我们的函数&lt;br&gt;      LONG __stdcall MyUnhandledExceptionFilter(&lt;br&gt;              PEXCEPTION_POINTERS pExceptionInfo){&lt;br&gt;          //设置生成的文件名为core.dmp&lt;br&gt;          CreateMiniDump(pExceptionInfo, L”core.dmp”);&lt;br&gt;          return EXCEPTION_EXECUTE_HANDLER;&lt;br&gt;      }&lt;/p&gt;
-&lt;p&gt;####关闭对函数SetUnhandledExceptionFilter的调用&lt;br&gt;       void DisableSetUnhandleExceptionFilter(){&lt;br&gt;           void&lt;em&gt; addr = (void&lt;/em&gt;)GetProcAddress(LoadLibrary(L”kernel32.dll”),&lt;br&gt;           “SetUnhandleExceptionFilter”);&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;if(addr){
-    unsigned char code[16];
-    int size = 0;
-    code[size++] = 0x33;
-    code[size++] = 0xC0;
-    code[size++] = 0xC2;
-    code[size++] = 0x04;
-    code[size++] = 0x00;
-    DWORD dwOldFlag, dwTempFlag;
-    VirtualProtect(addr,size, PAGE_READWRITE, &amp;amp;dwOldFlag);
-    WriteProcessMemory(GetCurrentProcess(),addr,code,size,NULL);
-    VirtualProtect(addr,size,dwOldFlag,&amp;amp;dwTempFlag);
-    }
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&quot;设置回调函数给系统-才能在崩溃是调用我们的函数&quot;&gt;&lt;a href=&quot;#设置回调函数给系统-才能在崩溃是调用我们的函数&quot; class=&quot;headerlink&quot; title=&quot;设置回调函数给系统,才能在崩溃是调用我们的函数&quot;&gt;&lt;/a&gt;设置回调函数给系统,才能在崩溃是调用我们的函数&lt;/h4&gt;&lt;pre&gt;&lt;code&gt;LONG __stdcall MyUnhandledExceptionFilter(
+        PEXCEPTION_POINTERS pExceptionInfo){
+    //设置生成的文件名为core.dmp
+    CreateMiniDump(pExceptionInfo, L&amp;quot;core.dmp&amp;quot;);
+    return EXCEPTION_EXECUTE_HANDLER;
 }
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;####安装dump代码,工程直接调用此韩剧即可&lt;br&gt;      void InitMiniDump(){&lt;br&gt;          //注册异常处理函数&lt;br&gt;          SetUnhandleExceptionFilter(MyUnhandledExceptionFilter);&lt;br&gt;          //关闭系统自己调用&lt;br&gt;          DisableSetUnhandledExceptionFilter();&lt;br&gt;      }&lt;/p&gt;
-</content>
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&quot;关闭对函数SetUnhandledExceptionFilter的调用&quot;&gt;&lt;a href=&quot;#关闭对函数SetUnhandledExceptionFilter的调用&quot; class=&quot;headerlink&quot; title=&quot;关闭对函数SetUnhandledExceptionFilter的调用&quot;&gt;&lt;/a&gt;关闭对函数SetUnhandledExceptionFilter的调用&lt;/h4&gt;&lt;pre&gt;&lt;code&gt;void DisableSetUnhandleExceptionFilter(){
+    void* addr = (void*)GetProcAddress(LoadLibrary(L&amp;quot;kernel32.dll&amp;quot;),
+    &amp;quot;SetUnhandleExceptionFilter&amp;quot;);
+
+ if(addr){
+     unsigned char code[16];
+     int size = 0;
+     code[size++] = 0x33;
+     code[size++] = 0xC0;
+     code[size++] = 0xC2;
+     code[size++] = 0x04;
+     code[size++] = 0x00;
+     DWORD dwOldFlag, dwTempFlag;
+     VirtualProtect(addr,size, PAGE_READWRITE, &amp;amp;dwOldFlag);
+     WriteProcessMemory(GetCurrentProcess(),addr,code,size,NULL);
+     VirtualProtect(addr,size,dwOldFlag,&amp;amp;dwTempFlag);
+     }
+ }
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&quot;安装dump代码-工程直接调用此韩剧即可&quot;&gt;&lt;a href=&quot;#安装dump代码-工程直接调用此韩剧即可&quot; class=&quot;headerlink&quot; title=&quot;安装dump代码,工程直接调用此韩剧即可&quot;&gt;&lt;/a&gt;安装dump代码,工程直接调用此韩剧即可&lt;/h4&gt;&lt;pre&gt;&lt;code&gt;void InitMiniDump(){
+    //注册异常处理函数
+    SetUnhandleExceptionFilter(MyUnhandledExceptionFilter);
+    //关闭系统自己调用
+    DisableSetUnhandledExceptionFilter();
+}
+&lt;/code&gt;&lt;/pre&gt;</content>
     
     <summary type="html">
     
       &lt;p&gt;  在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。&lt;/p&gt;
-&lt;p&gt;####dump如何加入到工程&lt;br&gt;  dump文件内容如下
+&lt;h4 id=&quot;dump如何加入到工程&quot;&gt;&lt;a href=&quot;#dum
     
     </summary>
     

@@ -60,30 +60,30 @@
 
 
 <meta name="description" content="在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。
-####dump如何加入到工程  dump文件内容如下: 
+dump如何加入到工程  dump文件内容如下: 
 #pragma once
 #include &amp;lt;windows.h&amp;gt;
    #include &amp;lt;DbgHelp.h&amp;gt;
-#">
+#incl">
 <meta property="og:type" content="article">
 <meta property="og:title" content="让exe崩溃时生成dump文件">
 <meta property="og:url" content="http://shuovr.cn/2016/03/21/让exe崩溃时生成dump文件/index.html">
 <meta property="og:site_name" content="放牛娃">
 <meta property="og:description" content="在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。
-####dump如何加入到工程  dump文件内容如下: 
+dump如何加入到工程  dump文件内容如下: 
 #pragma once
 #include &amp;lt;windows.h&amp;gt;
    #include &amp;lt;DbgHelp.h&amp;gt;
-#">
-<meta property="og:updated_time" content="2016-03-21T08:10:25.368Z">
+#incl">
+<meta property="og:updated_time" content="2016-03-21T08:13:16.659Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="让exe崩溃时生成dump文件">
 <meta name="twitter:description" content="在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。
-####dump如何加入到工程  dump文件内容如下: 
+dump如何加入到工程  dump文件内容如下: 
 #pragma once
 #include &amp;lt;windows.h&amp;gt;
    #include &amp;lt;DbgHelp.h&amp;gt;
-#">
+#incl">
 
 
 
@@ -264,7 +264,7 @@
 
       
         <p>  在Windows上编写C代码时，生成的exe有时会莫名的崩溃，日志有时候不能够发现程序在何处崩溃掉了。常用的方法就是让系统帮助我们生成一个dump文件，然后使用windebug来帮助查找原因。</p>
-<p>####dump如何加入到工程<br>  dump文件内容如下: </p>
+<h4 id="dump如何加入到工程"><a href="#dump如何加入到工程" class="headerlink" title="dump如何加入到工程"></a>dump如何加入到工程</h4><p>  dump文件内容如下: </p>
 <pre><code>#pragma once
 #include &lt;windows.h&gt;
    #include &lt;DbgHelp.h&gt;
@@ -299,8 +299,11 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
    }
    return FALSE;
  }
-</code></pre><p>####创建dump文件<br>       inline void CreateMiniDump(PEXCEPTION_POINTERS pep, LPCTSTR strFileName){<br>           HANDLE hFile = CreateFile(strFileName, GENERIC_READ|GENERIC_WRITE,FILE_SHARE_WRITE,NULL,CREATE_ALWAYS,<br>           FILE_ATTRIBUTE_NORMAL, NULL);</p>
-<pre><code>   if((hFile != NULL) &amp;&amp; (hFile != INVALID_HANDLE_VALUE)){
+</code></pre><h4 id="创建dump文件"><a href="#创建dump文件" class="headerlink" title="创建dump文件"></a>创建dump文件</h4><pre><code>inline void CreateMiniDump(PEXCEPTION_POINTERS pep, LPCTSTR strFileName){
+    HANDLE hFile = CreateFile(strFileName, GENERIC_READ|GENERIC_WRITE,FILE_SHARE_WRITE,NULL,CREATE_ALWAYS,
+    FILE_ATTRIBUTE_NORMAL, NULL);
+
+   if((hFile != NULL) &amp;&amp; (hFile != INVALID_HANDLE_VALUE)){
        MINIDUMP_EXCEPTION_INFORMATIN mdei;
        mdei.ThreadId     = GetCurrentThreadId();
        mdei.ExceptionPointers  = pep;
@@ -320,24 +323,37 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
        CloseHandle(hFile);
    }
 }
-</code></pre><p>####设置回调函数给系统,才能在崩溃是调用我们的函数<br>      LONG __stdcall MyUnhandledExceptionFilter(<br>              PEXCEPTION_POINTERS pExceptionInfo){<br>          //设置生成的文件名为core.dmp<br>          CreateMiniDump(pExceptionInfo, L”core.dmp”);<br>          return EXCEPTION_EXECUTE_HANDLER;<br>      }</p>
-<p>####关闭对函数SetUnhandledExceptionFilter的调用<br>       void DisableSetUnhandleExceptionFilter(){<br>           void<em> addr = (void</em>)GetProcAddress(LoadLibrary(L”kernel32.dll”),<br>           “SetUnhandleExceptionFilter”);</p>
-<pre><code>if(addr){
-    unsigned char code[16];
-    int size = 0;
-    code[size++] = 0x33;
-    code[size++] = 0xC0;
-    code[size++] = 0xC2;
-    code[size++] = 0x04;
-    code[size++] = 0x00;
-    DWORD dwOldFlag, dwTempFlag;
-    VirtualProtect(addr,size, PAGE_READWRITE, &amp;dwOldFlag);
-    WriteProcessMemory(GetCurrentProcess(),addr,code,size,NULL);
-    VirtualProtect(addr,size,dwOldFlag,&amp;dwTempFlag);
-    }
+</code></pre><h4 id="设置回调函数给系统-才能在崩溃是调用我们的函数"><a href="#设置回调函数给系统-才能在崩溃是调用我们的函数" class="headerlink" title="设置回调函数给系统,才能在崩溃是调用我们的函数"></a>设置回调函数给系统,才能在崩溃是调用我们的函数</h4><pre><code>LONG __stdcall MyUnhandledExceptionFilter(
+        PEXCEPTION_POINTERS pExceptionInfo){
+    //设置生成的文件名为core.dmp
+    CreateMiniDump(pExceptionInfo, L&quot;core.dmp&quot;);
+    return EXCEPTION_EXECUTE_HANDLER;
 }
-</code></pre><p>####安装dump代码,工程直接调用此韩剧即可<br>      void InitMiniDump(){<br>          //注册异常处理函数<br>          SetUnhandleExceptionFilter(MyUnhandledExceptionFilter);<br>          //关闭系统自己调用<br>          DisableSetUnhandledExceptionFilter();<br>      }</p>
+</code></pre><h4 id="关闭对函数SetUnhandledExceptionFilter的调用"><a href="#关闭对函数SetUnhandledExceptionFilter的调用" class="headerlink" title="关闭对函数SetUnhandledExceptionFilter的调用"></a>关闭对函数SetUnhandledExceptionFilter的调用</h4><pre><code>void DisableSetUnhandleExceptionFilter(){
+    void* addr = (void*)GetProcAddress(LoadLibrary(L&quot;kernel32.dll&quot;),
+    &quot;SetUnhandleExceptionFilter&quot;);
 
+ if(addr){
+     unsigned char code[16];
+     int size = 0;
+     code[size++] = 0x33;
+     code[size++] = 0xC0;
+     code[size++] = 0xC2;
+     code[size++] = 0x04;
+     code[size++] = 0x00;
+     DWORD dwOldFlag, dwTempFlag;
+     VirtualProtect(addr,size, PAGE_READWRITE, &amp;dwOldFlag);
+     WriteProcessMemory(GetCurrentProcess(),addr,code,size,NULL);
+     VirtualProtect(addr,size,dwOldFlag,&amp;dwTempFlag);
+     }
+ }
+</code></pre><h4 id="安装dump代码-工程直接调用此韩剧即可"><a href="#安装dump代码-工程直接调用此韩剧即可" class="headerlink" title="安装dump代码,工程直接调用此韩剧即可"></a>安装dump代码,工程直接调用此韩剧即可</h4><pre><code>void InitMiniDump(){
+    //注册异常处理函数
+    SetUnhandleExceptionFilter(MyUnhandledExceptionFilter);
+    //关闭系统自己调用
+    DisableSetUnhandledExceptionFilter();
+}
+</code></pre>
       
     </div>
 
@@ -472,7 +488,7 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
               
             
             
-              <p class="post-toc-empty">This post does not have a Table of Contents</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#dump如何加入到工程"><span class="nav-number">1.</span> <span class="nav-text">dump如何加入到工程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建dump文件"><span class="nav-number">2.</span> <span class="nav-text">创建dump文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#设置回调函数给系统-才能在崩溃是调用我们的函数"><span class="nav-number">3.</span> <span class="nav-text">设置回调函数给系统,才能在崩溃是调用我们的函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#关闭对函数SetUnhandledExceptionFilter的调用"><span class="nav-number">4.</span> <span class="nav-text">关闭对函数SetUnhandledExceptionFilter的调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装dump代码-工程直接调用此韩剧即可"><span class="nav-number">5.</span> <span class="nav-text">安装dump代码,工程直接调用此韩剧即可</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
