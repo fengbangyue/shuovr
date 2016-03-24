@@ -202,6 +202,181 @@
             
               
                 
+                <a class="post-title-link" href="/2016/03/23/外链服务器我用七牛/" itemprop="url">
+                  一个不错的外链服务器
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">Posted on</span>
+            <time itemprop="dateCreated" datetime="2016-03-23T17:56:53+08:00" content="2016-03-23">
+              2016-03-23
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/03/23/外链服务器我用七牛/" class="leancloud_visitors" data-flag-title="一个不错的外链服务器">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">visitors </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>   最近发现七牛云提供了一个免费的存储空间，还支持各种语言来操作，于是顺便捣鼓捣鼓一下。</p>
+<h3 id="如何申请七牛账号"><a href="#如何申请七牛账号" class="headerlink" title="如何申请七牛账号"></a>如何申请七牛账号</h3><p> <a href="https://portal.qiniu.com/signup?code=3le7dtz8hicsy" target="_blank" rel="external">注册地址看这里</a><br> 注册完成后，如果只是想测试一下有1G的免费空间使用。如果想使用10G的免费空间，那需要实名认证一下。提供2张手持身份证照片即可。认证很快，一两个小时就可以了。</p>
+<h3 id="如何使用外链"><a href="#如何使用外链" class="headerlink" title="如何使用外链"></a>如何使用外链</h3><p>注册完成后，就可以新建空间，然后就可以对刚创建的空间进行操作了。<br><img src="http://7xs0qk.com1.z0.glb.clouddn.com/111111.png" alt=""></p>
+<p>如上图，我创建了一个shuovr名字的空间，然后选择这个空间后，我们选择内容管理这一项。然后点击上传按钮。就可以开始传文件了。传完后，选择要查看外链的文件。<br><img src="http://7xs0qk.com1.z0.glb.clouddn.com/222222.png" alt="">右下角就可以看见对应文件的外链。把外链复制到你的博客、空间或者其他支持外链的地方。本文博客的图片也是使用七牛外链的。</p>
+<h3 id="最主要的是支持代码上传"><a href="#最主要的是支持代码上传" class="headerlink" title="最主要的是支持代码上传"></a>最主要的是支持代码上传</h3><p>我比较喜欢的一个功能是提供各种语言的SDK，来让我们自己实现代码上传功能。这也就是我为什么喜欢的原因。具体如何实现，可以参考官网的开发者文档。本处是在网上拼凑的一个使用Golang语言实现的文件上传功能。</p>
+<pre><code>// qiniuTest 
+project main.go
+package main
+
+import (
+    &quot;encoding/json&quot;
+    &quot;io/ioutil&quot;
+    &quot;os&quot;
+)
+
+import (
+    &quot;fmt&quot;
+    &quot;golang.org/x/net/context&quot;
+    &quot;qiniupkg.com/api.v7/kodo&quot;
+)
+
+var uptoken string
+var buckName string
+var currentDir string
+
+type config struct {
+    AK string
+    SK string
+    BN string
+}
+
+func main() {
+
+    currentDir, _ = os.Getwd()
+
+    file, err := os.Open(currentDir + &quot;/&quot; + &quot;qiniu.json&quot;) // For read access.
+    if err != nil {
+        //log.Fatal(err)
+    }
+    configFromFile, _ := ioutil.ReadAll(file)
+    var conf config
+    err = json.Unmarshal([]byte(configFromFile), &amp;conf)
+    if err != nil {
+        fmt.Println(&quot;error:&quot;, err)
+    }
+
+    kodo.SetMac(conf.AK, conf.SK)
+
+    zone := 0                // 您空间(Bucket)所在的区域
+    c := kodo.New(zone, nil) // 用默认配置创建 Client
+
+    bucket := c.Bucket(&quot;shuovr&quot;)
+    ctx := context.Background()
+
+    localFile := &quot;helloworld.txt&quot;
+    err = bucket.PutFile(ctx, nil, &quot;A/helloworld.txt&quot;, localFile, nil)
+    if err != nil {
+        fmt.Println(err) // 上传文件失败处理
+        return
+    }
+
+    entry, err := bucket.Stat(ctx, &quot;A/helloworld.txt&quot;) // 看看空间中是否存在某个文件，其属性是什么
+
+    fmt.Println(entry)
+
+    //bucket.Delete(ctx, &quot;foo/bar.jpg&quot;) // 删除空间中的某个文件
+    //bucket.ChangeMime(ctx, &quot;foo/bar.jpg&quot;, &quot;image/jpeg&quot;) // 修改某个文件的 MIME 属性
+    //bucket.Move(ctx, &quot;foo/bar.jpg&quot;, &quot;new-name.jpg&quot;) // 移动文件
+    //bucket.Copy(ctx, &quot;foo/bar.jpg&quot;, &quot;new-copy-file.jpg&quot;) // 复制文件
+
+    domain := &quot;7xs0qk.com1.z0.glb.clouddn.com&quot;              // 您的空间绑定的域名，这个可以在七牛的Portal中查到
+    baseUrl := kodo.MakeBaseUrl(domain, &quot;A/helloworld.txt&quot;) // 得到下载 url
+
+    fmt.Println(baseUrl)
+
+    fmt.Println(&quot;Hello World!&quot;)
+}
+</code></pre><p>我想这就是以后客户端编程的最初模型吧，编写一个远程存储文件的代码，如同操作本地一样简单。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/03/21/测试用七牛发图片博文/" itemprop="url">
                   测试图片内容
                 </a>
@@ -825,7 +1000,7 @@ inline BOOL CALLBACK MiniDumpCallback(PVOID pParam,
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/">
-              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-count">6</span>
               <span class="site-state-item-name">posts</span>
             </a>
           </div>
